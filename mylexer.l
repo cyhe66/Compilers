@@ -1,21 +1,21 @@
 %{
 #include "tokens-manual.h"
-#undef yywrap
+%option noyywrap
 
 enum num_types{
-	_CHAR; //0
-	_UCHAR;
-	_SHORT;
-	_USHORT;
-	_INT;
-	_UINT;
-	_LONG;
-	_ULONG;
-	_LONGLONG;
-	_ULONGLONG;
-	_FLOAT;
-	_DOUBLE;
-	_LDOUBLE;//12
+	_CHAR, //0
+	_UCHAR,
+	_SHORT,
+	_USHORT,
+	_INT,
+	_UINT,
+	_LONG,
+	_ULONG,
+	_LONGLONG,
+	_ULONGLONG,
+	_FLOAT,
+	_DOUBLE,
+	_LDOUBLE//12
 };
 
 /* int struct holds type, num_val*/
@@ -32,7 +32,7 @@ typedef struct{
 		long l;
 		unsigned long ul;
 		long long ll;
-		unsigned long long ul;
+		unsigned long long ull;
 		float f;
 		double d;
 		long double ld;
@@ -47,8 +47,8 @@ typedef struct {
 }string_group;
 
 /* converts string to int of correct type, loads into num struct */
-int num_funct(char * text, num_group * number, unsigned char ntype, int base;){
-	switch(type) {
+int num_funct(char * text, num_group * number, unsigned char ntype, int base){
+	switch(ntype) {
 		case _CHAR:
 			number->num_val.c = (char) strtol(text, NULL, base);
 			break;
@@ -67,20 +67,27 @@ int num_funct(char * text, num_group * number, unsigned char ntype, int base;){
 		case _UINT:
 			number->num_val.ui = (unsigned int) strtol(text, NULL, base);
 			break;
-		case _LONG;
+		case _LONG:
 			number->num_val.l = strtol(text, NULL, base);
 			break;
-		case _ULONG;
+		case _ULONG:
 			number->num_val.ul = (unsigned long) strtol(text, NULL, base);
 			break;
+		case _LONGLONG:
+			number->num_val.ll = (long long) strtol(text, NULL, base);
+			break;
+		case _ULONGLONG:
+			number->num_val.ull = (unsigned long long) strtol(text, NULL, base);
+			break;
+
 		case _FLOAT:
-			number-num_val.f = strtof(text, NULL, base);
+			number->num_val.f = strtof(text, NULL);
 			break;
-		case:_DOUBLE:
-			number->num_val.d = (double)strtof(text, NULL, base);
+		case _DOUBLE:
+			number->num_val.d = (double)strtof(text, NULL);
 			break;
-		case:_LDOUBLE:
-			number->num_val.ld = (long double)strtof(text, NULL, base);
+		case _LDOUBLE:
+			number->num_val.ld = (long double)strtof(text, NULL);
 			break;
 		default: 
 			break;
@@ -91,23 +98,21 @@ int num_funct(char * text, num_group * number, unsigned char ntype, int base;){
 
 typedef union {
 	char charlit;
-	number_group number;
+	num_group number;
 	string_group string;
 	char *ident;
 }YYSTYPE;
 
 extern YYSTYPE yylval;
-
-
 %}
 
 %%
 	/*C Keywords*/
-"auto"			{return AUTO};
-"char"			{return CHAR};
-"default"		{return DEFAULT};
-"else"			{return ELSE};
-"for"			{return FOR};
+"auto"			{return AUTO;}
+"char"			{return CHAR;}
+"default"		{return DEFAULT;}
+"else"			{return ELSE;}
+"for"			{return FOR;}
 "inline"		{return INLINE;}
 "return"		{return RETURN;}
 "static"		{return STATIC;}
@@ -152,7 +157,7 @@ extern YYSTYPE yylval;
 \!\=			{return NOTEQ;}
 \&\&			{return LOGAND;}
 \|\|			{return LOGOR;}
-\.\.\.			{return ELLIPSES;}
+\.\.\.			{return ELLIPSIS;}
 \*\=			{return TIMESEQ;}
 \/\=			{return DIVEQ;}
 \+\=			{return PLUSEQ;}
@@ -165,51 +170,49 @@ extern YYSTYPE yylval;
 
 
 	/*other ascii characters */
-
-\!			{return '!';}
-\"			{return '"';}
-\#			{return '#';}
-\$			{return '$';}
-\%			{return '&';}
-\&			{return '&';}
-\'			{return '\'';}
-\(			{return '(';}
-\}			{return ')';}
-\*			{return '*';}
-\+			{return '+';}
-\,			{return ',';}
-\-			{return '-';}
-\.			{return '.';}
-\/			{return '/';}
-\:			{return ':';}
-\;			{return ';';}
-\<			{return '<';}
-\=			{return '{';}
-\>			{return '>';}
-\?			{return '?';}
-\@			{return '@';}
-\[			{return '[';}
-\\			{return '\';}
-\]			{return ']';}
-\^			{return '^';}
-\_			{return '_';}
-\`			{return '`';}
-\{			{return '{';}
-\|			{return '|';}
-\}			{return '}';}
-\~			{return '~';}
-
-
-
+	/*
+	\!			{return '!';}
+	\"			{return '"';}
+	\#			{return '#';}
+	\$			{return '$';}
+	\%			{return '&';}
+	\&			{return '&';}
+	\'			{return '\'';}
+	\(			{return '(';}
+	\}			{return ')';}
+	\*			{return '*';}
+	\+			{return '+';}
+	\,			{return ',';}
+	\-			{return '-';}
+	\.			{return '.';}
+	\/			{return '/';}
+	\:			{return ':';}
+	\;			{return ';';}
+	\<			{return '<';}
+	\=			{return '{';}
+	\>			{return '>';}
+	\?			{return '?';}
+	\@			{return '@';}
+	"["			{return '[';}
+	"\"			{return '\';}
+	\]			{return ']';}
+	\^			{return '^';}
+	\_			{return '_';}
+	\`			{return '`';}
+	\{			{return '{';}
+	\|			{return '|';}
+	\}			{return '}';}
+	\~			{return '~';}
+	*/
 	/*number parsing */
 
 %%
 #include <stdio.h>
 
-int main(int argc, char **argv){
-	printf(stderr,"%d, %s", argc, argv);
+int main(){
+
+	printf("hello world");
 	//file = fopen();
 	//yylex();
 }
-
 
