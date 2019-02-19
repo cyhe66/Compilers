@@ -1,8 +1,8 @@
+%option noyywrap
 %{
 #include "tokens-manual.h"
-%option noyywrap
 
-enum num_types{
+enum num_types { 
 	_CHAR, //0
 	_UCHAR,
 	_SHORT,
@@ -103,7 +103,7 @@ typedef union {
 	char *ident;
 }YYSTYPE;
 
-extern YYSTYPE yylval;
+YYSTYPE yylval;
 %}
 
 %%
@@ -170,49 +170,76 @@ extern YYSTYPE yylval;
 
 
 	/*other ascii characters */
-	/*
-	\!			{return '!';}
-	\"			{return '"';}
-	\#			{return '#';}
-	\$			{return '$';}
-	\%			{return '&';}
-	\&			{return '&';}
-	\'			{return '\'';}
-	\(			{return '(';}
-	\}			{return ')';}
-	\*			{return '*';}
-	\+			{return '+';}
-	\,			{return ',';}
-	\-			{return '-';}
-	\.			{return '.';}
-	\/			{return '/';}
-	\:			{return ':';}
-	\;			{return ';';}
-	\<			{return '<';}
-	\=			{return '{';}
-	\>			{return '>';}
-	\?			{return '?';}
-	\@			{return '@';}
-	"["			{return '[';}
-	"\"			{return '\';}
-	\]			{return ']';}
-	\^			{return '^';}
-	\_			{return '_';}
-	\`			{return '`';}
-	\{			{return '{';}
-	\|			{return '|';}
-	\}			{return '}';}
-	\~			{return '~';}
-	*/
+\!			{return '!';}
+\"			{return '"';}
+\#			{return '#';}
+\$			{return '$';}
+\%			{return '&';}
+\&			{return '&';}
+\'			{return '\'';}
+\(			{return '(';}
+\)			{return ')';}
+\*			{return '*';}
+\+			{return '+';}
+\,			{return ',';}
+\-			{return '-';}
+\.			{return '.';}
+\/			{return '/';}
+\:			{return ':';}
+\;			{return ';';}
+\<			{return '<';}
+\=			{return '{';}
+\>			{return '>';}
+\?			{return '?';}
+\@			{return '@';}
+\[			{return '[';}
+\]			{return ']';}
+\^			{return '^';}
+\_			{return '_';}
+\`			{return '`';}
+\|			{return '|';}
+\{			{return '{';}
+\}			{return '}';}
+\~			{return '~';}
+\			{return '\\';}
 	/*number parsing */
+
+
+	/* floating point constants:
+	0.
+	3e1
+	3.14159
+	.0
+	1.0E-3
+	1e-3
+	1.0
+	0.00034
+	2e+9
+	1.0f
+	1.0e67L
+	0E1L
+	*/
+
+	/*floats*/
+	/* digit-sequence exponent suffix(optional) */
+-?[0-9]+[eE]-?[0-9]+[fFlL]?				{printf("Rule 1 <%s>\n", yytext);}
+	/*digit-sequence . exponent(optional) suffix(optional) */
+-?[0-9]+\.([eE]-?[0-9]+)?[fFlL]?			{printf("Rule 2 <%s>\n", yytext);}
+	/*digit-sequence(optional) . digit-sequence exponent(optional) suffix(optional) */
+-?([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?[fFlL]?			{printf("Rule 3 <%s>\n", yytext);}
+
+.			{ECHO;}
 
 %%
 #include <stdio.h>
 
 int main(){
+	printf("starting program\n");
+	float val;
+	for (;;){
+		yylex();
+	}
+	return 0;
 
-	printf("hello world");
-	//file = fopen();
-	//yylex();
 }
 
