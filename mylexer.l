@@ -220,13 +220,23 @@ YYSTYPE yylval;
 	0E1L
 	*/
 
-	/*floats*/
+		/*integer literals */
+	/*decimal-literal integer-suffix(optional)*/
+-?[1-9][0-9]*([uU]?[lL]?|[lL]?[uU]?)			{printf("Int Decimal Literal <%s>\n", yytext);}	
+	/*octal-literal integer-suffix(optional)*/
+-?0[0-7]*([uU]?[lL]?|[lL]?[uU]?)				{printf("Int Octal Literal <%s>\n", yytext);}
+	/*hex-literal integer-suffix(optional)*/
+-?0[xX][0-9a-fA-F]+([(uU)]?[lL]?|[lL]?[uU]?)	{printf("Int Hex Literal <%s>\n", yytext);}
+		/*floats literals*/
 	/* digit-sequence exponent suffix(optional) */
--?[0-9]+[eE]-?[0-9]+[fFlL]?				{printf("Rule 1 <%s>\n", yytext);}
+-?[0-9]+[eE]-?[0-9]+[fFlL]?						{printf("Float Rule 1 <%s>\n", yytext);}
 	/*digit-sequence . exponent(optional) suffix(optional) */
--?[0-9]+\.([eE]-?[0-9]+)?[fFlL]?			{printf("Rule 2 <%s>\n", yytext);}
+-?[0-9]+\.([eE]-?[0-9]+)?[fFlL]?				{printf("Float Rule 2 <%s>\n", yytext);}
 	/*digit-sequence(optional) . digit-sequence exponent(optional) suffix(optional) */
--?([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?[fFlL]?			{printf("Rule 3 <%s>\n", yytext);}
+-?([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?[fFlL]?		{printf("Float Rule 3 <%s>\n", yytext);}
+		/*character literals*/
+	/*c-char*/
+\'[^\'\\\n]+\'									{printf("char Rule 1 <%s>\n", yytext);}
 
 .			{ECHO;}
 

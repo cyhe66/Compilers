@@ -16,5 +16,26 @@
 0.1f
 0.1E-1L
 
+/*decimal int */
+1996
+123U
+1123L
+34535UL
+213LU
 
+/*octal int */
+01327
+0111u
+0123l
 
+/*hex int */
+0x09afFA
+0X12ffFCU
+0x123AALU
+
+/*C char */
+'a'
+'aaa'
+'b'
+'\''
+'\'
