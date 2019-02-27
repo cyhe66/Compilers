@@ -47,8 +47,10 @@ typedef struct {
 }string_group;
 
 /* converts string to int of correct type, loads into num struct */
-int num_funct(char * text, num_group * number, unsigned char ntype, int base){
-	switch(ntype) {
+int num_funct(char * text, num_group * number, int base, int num_type){
+	printf("num_string is: <%s>, base <%d>, type <%d>\n", text, base, num_type);
+	number->type = num_type;
+	switch(num_type) {
 		case _CHAR:
 			number->num_val.c = (char) strtol(text, NULL, base);
 			break;
@@ -92,7 +94,6 @@ int num_funct(char * text, num_group * number, unsigned char ntype, int base){
 		default: 
 			break;
 	}
-	number-> type = ntype;
 	return 0;
 }
 
@@ -222,22 +223,55 @@ YYSTYPE yylval;
 
 		/*integer literals */
 	/*decimal-literal integer-suffix(optional)*/
--?[1-9][0-9]*([uU]?[lL]?|[lL]?[uU]?)			{printf("Int Decimal Literal <%s>\n", yytext);}	
+-?[1-9][0-9]*((ul)|(uL)|(Ul)|(UL)|(lu)|(lU)|(Lu)|(LU))	{num_funct(yytext, &yylval.number,10, _ULONG); return NUMBER;}
+-?[1-9][0-9]*[uU]			{num_funct(yytext, &yylval.number, 10, _UINT);return NUMBER;}
+-?[1-9][0-9]*[lL]			{num_funct(yytext, &yylval.number, 10, _LONG);return NUMBER;}
+-?[1-9][0-9]*				{num_funct(yytext, &yylval.number, 10, _INT); return NUMBER;}
+	
 	/*octal-literal integer-suffix(optional)*/
--?0[0-7]*([uU]?[lL]?|[lL]?[uU]?)				{printf("Int Octal Literal <%s>\n", yytext);}
+-?0[0-7]*((ul)|(uL)|(Ul)|(UL)|(lu)|(lU)|(Lu)|(LU))		{num_funct(yytext, &yylval.number, 8, _ULONG); return NUMBER;}
+-?0[0-7]*[uU]				{num_funct(yytext, &yylval.number, 8, _UINT);return NUMBER;}
+-?0[0-7]*[lL]				{num_funct(yytext, &yylval.number, 8, _LONG);return NUMBER;}
+-?0[0-7]*					{num_funct(yytext, &yylval.number, 8, _INT);return NUMBER;}
 	/*hex-literal integer-suffix(optional)*/
--?0[xX][0-9a-fA-F]+([(uU)]?[lL]?|[lL]?[uU]?)	{printf("Int Hex Literal <%s>\n", yytext);}
+-?0[xX][0-9a-fA-F]+((ul)|(uL)|(Ul)|(UL)|(lu)|(lU)|(Lu)|(LU))		{num_funct(yytext, &yylval.number, 16, _ULONG);}
+-?0[xX][0-9a-fA-F]+[uU]		{num_funct(yytext, &yylval.number, 16, _UINT);return NUMBER;}
+-?0[xX][0-9a-fA-F]+[lL]		{num_funct(yytext, &yylval.number, 16, _LONG);return NUMBER;}
+-?0[xX][0-9a-fA-F]+			{num_funct(yytext, &yylval.number, 16, _INT);return NUMBER;}
+
 		/*floats literals*/
 	/* digit-sequence exponent suffix(optional) */
--?[0-9]+[eE]-?[0-9]+[fFlL]?						{printf("Float Rule 1 <%s>\n", yytext);}
+-?[0-9]+[eE]-?[0-9]+[fF]					{num_funct(yytext, &yylval.number, 10, _FLOAT);return NUMBER;}	
+-?[0-9]+[eE]-?[0-9]+[lL]					{num_funct(yytext, &yylval.number, 10, _LDOUBLE);return NUMBER;}	
+-?[0-9]+[eE]-?[0-9]+						{num_funct(yytext, &yylval.number, 10, _DOUBLE);return NUMBER;}	
 	/*digit-sequence . exponent(optional) suffix(optional) */
--?[0-9]+\.([eE]-?[0-9]+)?[fFlL]?				{printf("Float Rule 2 <%s>\n", yytext);}
+-?[0-9]+\.([eE]-?[0-9]+)?[fF]?				{num_funct(yytext, &yylval.number, 10, _FLOAT);return NUMBER;}
+-?[0-9]+\.([eE]-?[0-9]+)?[lL]?				{num_funct(yytext, &yylval.number, 10, _LDOUBLE);return NUMBER;}
+-?[0-9]+\.([eE]-?[0-9]+)?					{num_funct(yytext, &yylval.number, 10, _DOUBLE);return NUMBER;}
 	/*digit-sequence(optional) . digit-sequence exponent(optional) suffix(optional) */
--?([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?[fFlL]?		{printf("Float Rule 3 <%s>\n", yytext);}
-		/*character literals*/
-	/*c-char*/
-\'[^\'\\\n]+\'									{printf("char Rule 1 <%s>\n", yytext);}
+-?([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?[fF]		{num_funct(yytext, &yylval.number, 10, _FLOAT);return NUMBER;}
+-?([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?[lL]		{num_funct(yytext, &yylval.number, 10, _LDOUBLE);return NUMBER;}
+-?([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?			{num_funct(yytext, &yylval.number, 10, _DOUBLE);return NUMBER;}
 
+		/*character literals*/
+	/*c-char or L-char*/
+	/*	\0 \a \b \f \n \r \t \v ' " \ \\ \? hex escapes, octal escapes
+	else:	 \\%03o
+	*/
+L?\'\\0.*\'									{yylval.charlit = '\0'; printf("\\0\n"); return CHARLIT;}
+L?\'\\a.*\'									{yylval.charlit = '\a'; printf("\\a\n"); return CHARLIT;}
+L?\'\\b.*\'									{yylval.charlit = '\b'; printf("\\b\n"); return CHARLIT;}
+L?\'\\f.*\'									{yylval.charlit = '\f'; printf("\\f\n"); return CHARLIT;}
+L?\'\\n.*\'									{yylval.charlit = '\n'; printf("\\n\n"); return CHARLIT;}
+L?\'\\r.*\'									{yylval.charlit = '\r'; printf("\\r\n"); return CHARLIT;}
+L?\'\\t.*\'									{yylval.charlit = '\t'; printf("\\t\n"); return CHARLIT;}
+L?\'\\v.*\'									{yylval.charlit = '\v'; printf("\\v\n"); return CHARLIT;}
+L?\'\\\'.*\'								{yylval.charlit = '\''; printf("\\\'\n");return CHARLIT;}
+L?\'\\\".*\'								{yylval.charlit = '\"'; printf("\\\"\n");return CHARLIT;}
+L?\'\\\\\'.*\'								{yylval.charlit = '\\'; printf("\\\\\n");return CHARLIT;}
+L?\'\\\?.*\'									{yylval.charlit = '\?'; printf("\\\?\n");return CHARLIT;}
+
+\'[^\'\\\n]+\'								{printf("<%s>", yytext); return CHARLIT;}
 .			{ECHO;}
 
 %%
@@ -245,9 +279,10 @@ YYSTYPE yylval;
 
 int main(){
 	printf("starting program\n");
+	int ret_val;
 	float val;
-	for (;;){
-		yylex();
+	while ((ret_val = yylex()) != TOKEOF) {
+		/*printf("<%d>\n", ret_val);*/
 	}
 	return 0;
 
